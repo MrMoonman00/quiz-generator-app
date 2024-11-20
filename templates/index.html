@@ -96,7 +96,7 @@
 
     <script>
         // Get the base URL from Flask
-        const baseUrl = '{{ config.get("BASE_URL", request.url_root.rstrip("/")) }}';
+        const baseUrl = window.location.origin;
         
         // Function to show error message
         function showError(message) {
