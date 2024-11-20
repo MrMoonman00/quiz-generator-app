@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-4">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold mb-6">Quiz</h1>
+            
+            <!-- YouTube Video -->
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold mb-2">Source Video</h2>
+                <div class="aspect-w-16 aspect-h-9">
+                    <iframe 
+                        src="https://www.youtube.com/embed/{{ youtube_url.split('v=')[1] }}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen
+                        class="w-full h-64"
+                    ></iframe>
+                </div>
+            </div>
+
+            <!-- Quiz Questions -->
+            <div id="questions">
+                {% for question in questions %}
+                <div class="mb-8 p-4 bg-gray-50 rounded-lg question-container">
+                    <p class="font-semibold mb-4">{{ loop.index }}. {{ question.question }}</p>
+                    <div class="space-y-2">
+                        {% for option in question.options %}
+                        <div class="flex items-center">
+                            <input 
+                                type="radio" 
+                                name="q_{{ question.index0 }}"
+                                id="q_{{ question.index0 }}_{{ loop.index0 }}"
+                                value="{{ option }}"
+                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 question-option"
+                                data-correct="{{ question.correct_answer }}"
+                            >
+                            <label for="q_{{ question.index0 }}_{{ loop.index0 }}" class="ml-2">{{ option }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-4 hidden answer">
+                        <p class="text-green-600 font-medium">Correct Answer: {{ question.correct_answer }}</p>
+                        <p class="text-gray-600 mt-1">{{ question.explanation }}</p>
+                    </div>
+                    <div class="mt-2 result hidden"></div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Score Display -->
+            <div id="score" class="mt-4 text-center hidden">
+                <p class="text-xl font-semibold">Your Score: <span id="score-value">0</span>/<span id="total-questions">0</span></p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex justify-between mt-6">
+                <button 
+                    onclick="checkAnswers()" 
+                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                    Check Answers
+                </button>
+                <button 
+                    onclick="copyShareLink()" 
+                    class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                >
+                    Share Quiz
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkAnswers() {
+            const questionContainers = document.querySelectorAll('.question-container');
+            let score = 0;
+            let totalQuestions = questionContainers.length;
+            
+            questionContainers.forEach(container => {
+                const selectedOption = container.querySelector('input[type="radio"]:checked');
+                const resultDiv = container.querySelector('.result');
+                const answerDiv = container.querySelector('.answer');
+                
+                resultDiv.classList.remove('hidden');
+                answerDiv.classList.remove('hidden');
+                
+                if (!selectedOption) {
+                    resultDiv.innerHTML = '<p class="text-yellow-600">⚠️ Please select an answer</p>';
+                    return;
+                }
+                
+                const correctAnswer = selectedOption.getAttribute('data-correct');
+                if (selectedOption.value === correctAnswer) {
+                    resultDiv.innerHTML = '<p class="text-green-600">✓ Correct!</p>';
+                    score++;
+                } else {
+                    resultDiv.innerHTML = '<p class="text-red-600">✗ Incorrect</p>';
+                }
+            });
+            
+            // Update score display
+            const scoreDiv = document.getElementById('score');
+            const scoreValue = document.getElementById('score-value');
+            const totalQuestionsSpan = document.getElementById('total-questions');
+            
+            scoreValue.textContent = score;
+            totalQuestionsSpan.textContent = totalQuestions;
+            scoreDiv.classList.remove('hidden');
+        }
+
+        function copyShareLink() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Quiz link copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
